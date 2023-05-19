@@ -1,8 +1,25 @@
 require('../../config.js');
 require('dotenv').config()
-console.log(process.env.DB_URL)
+console.log(process.env.DB_URL);
 const pgp = require('pg-promise')();
 const db = pgp(process.env.DB_URL);
+ 
+// tests connection and returns Postgres server version,
+// if successful; or else rejects with connection error:
+async function testConnection() {
+    console.log('Testing connection to Postgres server...');
+    const c = await db.connect(); // try to connect
+    c.done(); // success, release connection
+    console.log('Connected to Postgres server.');
+    return c.client.serverVersion; // return server version
+}
+
+testConnection().then(version => {
+    console.log('Postgres server version:', version);
+}).catch(err => {
+    console.log('Error testing connection to Postgres server:');
+    console.log(err);
+});
 
 const schemaSql = `
     -- Extensions
@@ -69,6 +86,7 @@ const dataSql = `
     FROM generate_series(1, 1000000) AS s(i);
 `;
 
+// Create the schema and populate dummy data
 db.none(schemaSql).then(() => {
     console.log('Schema created');
     db.none(dataSql).then(() => {
@@ -78,3 +96,4 @@ db.none(schemaSql).then(() => {
 }).catch(err => {
     console.log('Error creating schema', err);
 });
+

@@ -21,6 +21,7 @@ router.get('/posts', function(req, res, next) {
 // Create
 router.post('/posts', function(req, res, next) {
     const {mood, text} = req.body;
+    console.log(mood)
     if (!mood || !text) {
         const err = new Error('Mood and text are required');
         err.status = 400;
